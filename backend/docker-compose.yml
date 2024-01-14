@@ -1,0 +1,37 @@
+version: '3.9'
+
+volumes:
+  postgres_data_: {}
+
+services:
+  task-management:
+    container_name: task-management
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: development
+    env_file:
+      - .env.development
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: yarn start:dev
+    ports:
+      - "3000:3000"
+    depends_on:
+      - task-management-postgres
+
+  task-management-postgres:
+    container_name: task-management-postgres
+    image: postgres:14.5-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: 'postgres'
+      POSTGRES_PASSWORD: 'postgres'
+      POSTGRES_DB: 'task_management'
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data_:/var/lib/postgresql/data
